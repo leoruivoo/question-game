@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Question Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --bg-soft: #e5e7eb;
+      --card: #ffffff;
+      --accent: #f97316;
+      --accent-soft: #ffedd5;
+      --accent-strong: #ea580c;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #f9fafb, #e5e7eb 70%);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card);
+      border-radius: 24px;
+      border: 1px solid rgba(209, 213, 219, 0.9);
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.9);
+      padding: 20px 18px 22px;
+    }
+
+    @media (min-width: 768px) {
+      .app {
+        padding: 26px 28px 28px;
+      }
+    }
+
+    .app-header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h1 span.logo-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 10px rgba(248, 113, 22, 0.8);
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .mode-btn {
+      border: none;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .mode-btn span.icon {
+      font-size: 0.9rem;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(to right, #fed7aa, #fdba74);
+      color: #7c2d12;
+      font-weight: 600;
+      box-shadow: 0 0 8px rgba(248, 113, 22, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .subtitle strong {
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 768px) {
+      .category-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+    }
+
+    .category-card {
+      background: linear-gradient(to bottom right, #ffffff, #f9fafb);
+      border-radius: var(--radius-md);
+      border: 1px solid #e5e7eb;
+      padding: 10px 11px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: border 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease,
+        background 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .category-card:hover {
+      border-color: rgba(248, 113, 22, 0.8);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .category-card.active {
+      border-color: var(--accent-strong);
+      background: linear-gradient(to bottom right, #fffbeb, #fef3c7);
+      box-shadow: 0 12px 24px rgba(248, 113, 22, 0.25);
+    }
+
+    .category-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .category-desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .category-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .progress-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f9fafb;
+      border-radius: 999px;
+      padding: 1px 8px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .progress-pill span.dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--success);
+    }
+
+    .question-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid #e5e7eb;
+      padding: 18px 16px 14px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+      min-height: 110px;
+    }
+
+    /* FaceTime = more "full-screen feeling" */
+    .question-card.call-mode {
+      padding: 26px 22px 20px;
+      min-height: 170px;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .question-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .question-tag span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent-strong);
+    }
+
+    .question-mode-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .question-mode-label span.dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: #38bdf8;
+    }
+
+    .question-text {
+      font-size: 1.02rem;
+      line-height: 1.5;
+      position: relative;
+      z-index: 1;
+    }
+
+    .question-card.call-mode .question-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+    }
+
+    .question-text.custom {
+      font-style: italic;
+    }
+
+    .question-hint {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    .question-card.call-mode .question-hint {
+      font-size: 0.76rem;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .controls-left,
+    .controls-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.16s ease, transform 0.12s ease,
+        box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .btn-primary {
+      border-color: rgba(248, 113, 22, 0.9);
+      background: linear-gradient(to right, #fed7aa, #fdba74);
+      color: #7c2d12;
+      font-weight: 600;
+      box-shadow: 0 10px 18px rgba(248, 113, 22, 0.35);
+    }
+
+    .btn-ghost {
+      border-style: dashed;
+      border-color: #d1d5db;
+      background: #ffffff;
+      color: var(--muted);
+    }
+
+    .btn-danger {
+      border-color: rgba(239, 68, 68, 0.8);
+      color: #b91c1c;
+    }
+
+    .btn:hover {
+      transform: translateY(-0.5px);
+      box-shadow: 0 8px 14px rgba(15, 23, 42, 0.12);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .status-text {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .status-text strong {
+      color: var(--accent-strong);
+    }
+
+    .add-card {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px dashed #e5e7eb;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .add-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .add-title-row h2 {
+      margin: 0;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .add-title-row h2 span.icon {
+      font-size: 1rem;
+    }
+
+    .add-subtitle {
+      margin: 0;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .add-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .add-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    select,
+    textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 6px 8px;
+      resize: vertical;
+      min-height: 34px;
+    }
+
+    textarea {
+      min-height: 60px;
+      font-family: inherit;
+    }
+
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-strong);
+      box-shadow: 0 0 0 1px rgba(248, 113, 22, 0.4);
+    }
+
+    .mode-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .mode-checkboxes label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .mode-checkboxes input {
+      accent-color: var(--accent-strong);
+    }
+
+    .add-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .hint-text {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .hint-text code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+      font-size: 0.7rem;
+      background: #f3f4f6;
+      padding: 2px 4px;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #111827;
+      border-radius: 999px;
+      border: 1px solid rgba(249, 250, 251, 0.9);
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 12px 25px rgba(15, 23, 42, 0.6);
+      z-index: 50;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      color: #f9fafb;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .toast span.icon {
+      font-size: 1rem;
+    }
+
+    .custom-input-row {
+      margin-top: 6px;
+      padding: 8px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px dashed #e5e7eb;
+    }
+
+    .custom-input-row label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .custom-input-row input {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 0.82rem;
+      padding: 6px 10px;
+    }
+
+    .custom-input-row input:focus {
+      outline: none;
+      border-color: var(--accent-strong);
+      box-shadow: 0 0 0 1px rgba(248, 113, 22, 0.4);
+    }
+
+    .custom-actions {
+      margin-top: 6px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: var(--accent-soft);
+      color: #7c2d12;
+      border: 1px solid rgba(248, 113, 22, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="title-row">
+        <h1><span class="logo-dot"></span> Question Game</h1>
+        <div class="mode-switch" id="mode-switch">
+          <button class="mode-btn active" data-mode="text">
+            <span class="icon">📝</span>
+            Text Mode
+          </button>
+          <button class="mode-btn" data-mode="call">
+            <span class="icon">🎥</span>
+            FaceTime Mode
+          </button>
+        </div>
+      </div>
+      <p class="subtitle">
+        Pick a <strong>vibe</strong>, draw a question, and both of you answer it —
+        by text or on a call.
+      </p>
+    </header>
+
+    <section>
+      <div class="section-label">Categories</div>
+      <div class="category-grid" id="category-grid">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <section>
+      <div class="controls-row">
+        <div class="controls-left">
+          <button class="btn btn-primary" id="draw-btn">
+            <span>✨ Draw Question</span>
+          </button>
+          <button class="btn btn-ghost" id="skip-btn">
+            ⏭ Skip
+          </button>
+        </div>
+        <div class="controls-right">
+          <button class="btn btn-ghost btn-danger" id="reset-btn" title="Reset answered questions for all categories">
+            🔁 Reset Progress
+          </button>
+        </div>
+      </div>
+
+      <div id="question-container">
+        <div class="question-card">
+          <div class="question-header">
+            <div class="question-tag">
+              <span class="dot"></span> Ready when you are
+            </div>
+            <div class="question-mode-label">
+              <span class="dot"></span>Pick a category &amp; draw
+            </div>
+          </div>
+          <div class="question-text">
+            Choose a mode, tap a category, then hit <strong>“Draw Question”</strong>. Both of you answer the same one.
+          </div>
+          <div class="question-hint">
+            Some numbers are <span class="badge">custom slots</span> — when they appear, you invent your own question for that round.
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div class="controls-left">
+          <button class="btn" id="answered-btn" disabled>
+            ✅ Mark as Answered
+          </button>
+        </div>
+        <div class="controls-right">
+          <div class="status-text" id="status-text">
+            No question drawn yet.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="add-card">
+      <div class="add-title-row">
+        <div>
+          <h2><span class="icon">➕</span>Add Your Own Question</h2>
+          <p class="add-subtitle">
+            Extend the deck with your ideas. They’re saved only on this device.
+          </p>
+        </div>
+        <span class="pill">Playful &amp; Private</span>
+      </div>
+
+      <div class="add-grid">
+        <div>
+          <label class="section-label" style="margin-bottom:4px;">Category</label>
+          <select id="add-category"></select>
+
+          <div class="mode-checkboxes">
+            <label>
+              <input type="checkbox" id="mode-text" checked />
+              Text
+            </label>
+            <label>
+              <input type="checkbox" id="mode-call" checked />
+              FaceTime
+            </label>
+          </div>
+        </div>
+        <div>
+          <label class="section-label" style="margin-bottom:4px;">Question</label>
+          <textarea id="add-text" placeholder="Type your question here..."></textarea>
+        </div>
+      </div>
+
+      <div class="add-footer">
+        <button class="btn btn-primary" id="add-btn">Add Question</button>
+        <p class="hint-text">
+          To hard-code more, edit <code>BASE_QUESTIONS</code> in the HTML file.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="icon">✅</span>
+    <span id="toast-message">Saved.</span>
+  </div>
+
+  <script>
+    // --------------------------
+    // Data model
+    // --------------------------
+
+    const CATEGORIES = [
+      {
+        id: "playful",
+        label: "Playful",
+        emoji: "🎲",
+        desc: "Light, fun, easy questions."
+      },
+      {
+        id: "connection",
+        label: "Connection",
+        emoji: "💬",
+        desc: "Deeper but still safe."
+      },
+      {
+        id: "vulnerability",
+        label: "Vulnerability",
+        emoji: "🫀",
+        desc: "Sharing real inner stuff."
+      },
+      {
+        id: "intimacy",
+        label: "Soft Intimacy",
+        emoji: "✨",
+        desc: "Warm, close, not explicit."
+      },
+      {
+        id: "flirty",
+        label: "Flirty",
+        emoji: "🌶",
+        desc: "Playful tension, respectful."
+      },
+      {
+        id: "wildcard",
+        label: "Wildcard",
+        emoji: "🎲",
+        desc: "Anything can show up."
+      }
+    ];
+
+    // type: "normal" | "custom-slot"
+    // modes: ["text","call"]
+    const BASE_QUESTIONS = [
+      // PLAYFUL
+      {
+        id: "playful-1",
+        category: "playful",
+        text: "If you could teleport anywhere right now, where would we go?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "playful-2",
+        category: "playful",
+        text: "What small, silly thing instantly makes your day better?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "playful-3",
+        category: "playful",
+        text: "If our day together was a movie scene, what song would be playing?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "playful-4",
+        category: "playful",
+        text: "You get a magic remote: rewind, pause, or fast-forward life right now?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "playful-custom-1",
+        category: "playful",
+        text: "(Custom Slot) When this appears, you create your own playful question.",
+        modes: ["text", "call"],
+        type: "custom-slot"
+      },
+
+      // CONNECTION
+      {
+        id: "connection-1",
+        category: "connection",
+        text: "What’s something you wish people understood better about you?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "connection-2",
+        category: "connection",
+        text: "What’s the biggest lesson you’ve learned this year?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "connection-3",
+        category: "connection",
+        text: "What gives you the feeling of ‘home’?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "connection-custom-1",
+        category: "connection",
+        text: "(Custom Slot) Create a question about connection when this appears.",
+        modes: ["text", "call"],
+        type: "custom-slot"
+      },
+
+      // VULNERABILITY
+      {
+        id: "vulnerability-1",
+        category: "vulnerability",
+        text: "What’s something you need when you’re sad but rarely ask for?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "vulnerability-2",
+        category: "vulnerability",
+        text: "What fear has shaped you the most?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "vulnerability-3",
+        category: "vulnerability",
+        text: "What truth did you learn the hard way?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "vulnerability-custom-1",
+        category: "vulnerability",
+        text: "(Custom Slot) Use this to ask a brave question.",
+        modes: ["text", "call"],
+        type: "custom-slot"
+      },
+
+      // SOFT INTIMACY
+      {
+        id: "intimacy-1",
+        category: "intimacy",
+        text: "What kind of atmosphere instantly relaxes you?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "intimacy-2",
+        category: "intimacy",
+        text: "What makes you feel truly seen by someone?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "intimacy-3",
+        category: "intimacy",
+        text: "What small gesture feels surprisingly intimate to you?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "intimacy-custom-1",
+        category: "intimacy",
+        text: "(Custom Slot) Make up a soft, close question when this appears.",
+        modes: ["text", "call"],
+        type: "custom-slot"
+      },
+
+      // FLIRTY
+      {
+        id: "flirty-1",
+        category: "flirty",
+        text: "What was the first thing you noticed about me?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "flirty-2",
+        category: "flirty",
+        text: "What kind of compliment hits you deeper than usual?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "flirty-3",
+        category: "flirty",
+        text: "If we were characters in a movie, what genre would our scenes be?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "flirty-custom-1",
+        category: "flirty",
+        text: "(Custom Slot) Create your own playful, flirty question here.",
+        modes: ["text", "call"],
+        type: "custom-slot"
+      },
+
+      // WILDCARD
+      {
+        id: "wildcard-1",
+        category: "wildcard",
+        text: "Tell me about a moment you realized you’d changed as a person.",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "wildcard-2",
+        category: "wildcard",
+        text: "What part of yourself are you learning to love?",
+        modes: ["text", "call"],
+        type: "normal"
+      },
+      {
+        id: "wildcard-custom-1",
+        category: "wildcard",
+        text: "(Custom Slot) Anything goes. Invent the question on the spot.",
+        modes: ["text", "call"],
+        type: "custom-slot"
+      }
+    ];
+
+    const STORAGE_CUSTOM_KEY = "qaGameCustomQuestions_v1";
+    const STORAGE_ANSWERED_KEY = "qaGameAnswered_v1";
+
+    let currentMode = "text"; // "text" | "call"
+    let currentCategory = null; // category id
+    let currentQuestion = null; // question object
+    let currentCustomText = ""; // for custom-slot typed text
+
+    let customQuestions = loadCustomQuestions();
+    let answered = loadAnswered();
+    let allQuestions = mergeQuestions();
+
+    // --------------------------
+    // Loading / Saving
+    // --------------------------
+
+    function loadCustomQuestions() {
+      try {
+        const raw = localStorage.getItem(STORAGE_CUSTOM_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed;
+      } catch (e) {
+        console.error("Error loading custom questions", e);
+        return [];
+      }
+    }
+
+    function saveCustomQuestions() {
+      try {
+        localStorage.setItem(STORAGE_CUSTOM_KEY, JSON.stringify(customQuestions));
+      } catch (e) {
+        console.error("Error saving custom questions", e);
+      }
+    }
+
+    function loadAnswered() {
+      try {
+        const raw = localStorage.getItem(STORAGE_ANSWERED_KEY);
+        if (!raw) return {};
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (e) {
+        console.error("Error loading answered", e);
+        return {};
+      }
+    }
+
+    function saveAnswered() {
+      try {
+        localStorage.setItem(STORAGE_ANSWERED_KEY, JSON.stringify(answered));
+      } catch (e) {
+        console.error("Error saving answered", e);
+      }
+    }
+
+    function mergeQuestions() {
+      return [...BASE_QUESTIONS, ...customQuestions];
+    }
+
+    // --------------------------
+    // UI Helpers
+    // --------------------------
+
+    const modeSwitchEl = document.getElementById("mode-switch");
+    const categoryGridEl = document.getElementById("category-grid");
+    const drawBtnEl = document.getElementById("draw-btn");
+    const skipBtnEl = document.getElementById("skip-btn");
+    const resetBtnEl = document.getElementById("reset-btn");
+    const questionContainerEl = document.getElementById("question-container");
+    const answeredBtnEl = document.getElementById("answered-btn");
+    const statusTextEl = document.getElementById("status-text");
+    const toastEl = document.getElementById("toast");
+    const toastMessageEl = document.getElementById("toast-message");
+
+    const addCategoryEl = document.getElementById("add-category");
+    const addTextEl = document.getElementById("add-text");
+    const addBtnEl = document.getElementById("add-btn");
+    const modeTextCheckboxEl = document.getElementById("mode-text");
+    const modeCallCheckboxEl = document.getElementById("mode-call");
+
+    function showToast(message) {
+      toastMessageEl.textContent = message;
+      toastEl.classList.add("visible");
+      setTimeout(() => {
+        toastEl.classList.remove("visible");
+      }, 1800);
+    }
+
+    function getCategoryStats() {
+      const stats = {};
+      allQuestions.forEach((q) => {
+        const cat = q.category;
+        if (!stats[cat]) {
+          stats[cat] = { total: 0, answered: 0 };
+        }
+        if (q.modes.includes(currentMode) || q.modes.length === 0) {
+          stats[cat].total++;
+          if (answered[q.id]) {
+            stats[cat].answered++;
+          }
+        }
+      });
+      return stats;
+    }
+
+    function renderCategories() {
+      categoryGridEl.innerHTML = "";
+      const stats = getCategoryStats();
+
+      CATEGORIES.forEach((cat) => {
+        const total = stats[cat.id]?.total ?? 0;
+        const done = stats[cat.id]?.answered ?? 0;
+        const card = document.createElement("button");
+        card.className = "category-card" + (currentCategory === cat.id ? " active" : "");
+        card.setAttribute("data-category", cat.id);
+
+        const inner = `
+          <div class="category-name">
+            <span>${cat.emoji}</span>
+            <span>${cat.label}</span>
+          </div>
+          <div class="category-desc">${cat.desc}</div>
+          <div class="category-meta">
+            <span>${total} questions</span>
+            <span class="progress-pill">
+              <span class="dot"></span>
+              ${done}/${total} answered
+            </span>
+          </div>
+        `;
+        card.innerHTML = inner;
+        categoryGridEl.appendChild(card);
+      });
+    }
+
+    function updateStatusText() {
+      if (!currentCategory) {
+        statusTextEl.innerHTML = `No category selected. Choose one above.`;
+        return;
+      }
+      const stats = getCategoryStats()[currentCategory] || { total: 0, answered: 0 };
+      statusTextEl.innerHTML = `
+        <strong>${stats.answered}/${stats.total}</strong> answered in this category (mode: ${currentMode}).
+      `;
+    }
+
+    function renderQuestion() {
+      if (!currentQuestion) return;
+
+      const isCustomSlot = currentQuestion.type === "custom-slot";
+      const displayText = isCustomSlot
+        ? (currentCustomText || currentQuestion.text)
+        : currentQuestion.text;
+
+      const categoryObj = CATEGORIES.find((c) => c.id === currentQuestion.category);
+      const categoryLabel = categoryObj ? categoryObj.label : "Unknown";
+
+      const isAnswered = !!answered[currentQuestion.id];
+
+      const hint = isCustomSlot
+        ? "This is a custom slot. Type your own question below for this round."
+        : (currentMode === "call"
+            ? "Read it out loud and answer on the call. Both of you respond."
+            : "Send it in text or answer by voice notes. Both of you respond.");
+
+      const modeLabel =
+        currentQuestion.modes.length === 2
+          ? "Text & FaceTime"
+          : currentQuestion.modes[0] === "text"
+          ? "Text only"
+          : "FaceTime only";
+
+      const callModeClass = currentMode === "call" ? "call-mode" : "";
+
+      questionContainerEl.innerHTML = `
+        <div class="question-card ${callModeClass}">
+          <div class="question-header">
+            <div class="question-tag">
+              <span class="dot"></span>
+              ${categoryLabel}
+            </div>
+            <div class="question-mode-label">
+              <span class="dot"></span>${modeLabel}
+            </div>
+          </div>
+          <div class="question-text ${isCustomSlot && currentCustomText ? "custom" : ""}">
+            ${displayText}
+          </div>
+          <div class="question-hint">
+            ${hint}
+          </div>
+          ${
+            isCustomSlot
+              ? `
+            <div class="custom-input-row">
+              <label>Custom question for this round:</label>
+              <input type="text" id="custom-question-input" placeholder="Type the exact question you want to ask..." value="${currentCustomText
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")}">
+              <div class="custom-actions">
+                <button class="btn btn-ghost" id="use-default-btn">Use slot text</button>
+                <button class="btn btn-primary" id="use-custom-btn">Use this question</button>
+              </div>
+            </div>
+          `
+              : ""
+          }
+        </div>
+      `;
+
+      answeredBtnEl.disabled = isAnswered || !currentQuestion;
+
+      if (isCustomSlot) {
+        const customInput = document.getElementById("custom-question-input");
+        const useCustomBtn = document.getElementById("use-custom-btn");
+        const useDefaultBtn = document.getElementById("use-default-btn");
+
+        if (customInput) {
+          customInput.addEventListener("input", (e) => {
+            currentCustomText = e.target.value;
+          });
+        }
+
+        if (useCustomBtn) {
+          useCustomBtn.addEventListener("click", () => {
+            currentCustomText = customInput ? customInput.value.trim() : "";
+            renderQuestion();
+          });
+        }
+
+        if (useDefaultBtn) {
+          useDefaultBtn.addEventListener("click", () => {
+            currentCustomText = "";
+            renderQuestion();
+          });
+        }
+      }
+    }
+
+    function selectCategory(catId) {
+      currentCategory = catId;
+      currentQuestion = null;
+      currentCustomText = "";
+      renderCategories();
+      updateStatusText();
+      questionContainerEl.innerHTML = `
+        <div class="question-card ${currentMode === "call" ? "call-mode" : ""}">
+          <div class="question-header">
+            <div class="question-tag">
+              <span class="dot"></span>${CATEGORIES.find((c) => c.id === catId)?.label || "Category"}
+            </div>
+            <div class="question-mode-label">
+              <span class="dot"></span>Mode: ${currentMode === "text" ? "Text" : "FaceTime"}
+            </div>
+          </div>
+          <div class="question-text">
+            Hit <strong>“Draw Question”</strong> to pull a random one from this category.
+          </div>
+          <div class="question-hint">
+            You’ll both answer the same question. If a <span class="badge">custom slot</span> appears, you invent the question for that round.
+          </div>
+        </div>
+      `;
+      answeredBtnEl.disabled = true;
+    }
+
+    function changeMode(mode) {
+      currentMode = mode;
+      currentQuestion = null;
+      currentCustomText = "";
+      renderCategories();
+      updateStatusText();
+      questionContainerEl.innerHTML = `
+        <div class="question-card ${currentMode === "call" ? "call-mode" : ""}">
+          <div class="question-header">
+            <div class="question-tag">
+              <span class="dot"></span>Mode changed
+            </div>
+            <div class="question-mode-label">
+              <span class="dot"></span>${mode === "text" ? "Text Mode" : "FaceTime Mode"}
+            </div>
+          </div>
+          <div class="question-text">
+            Mode switched to <strong>${mode === "text" ? "Text" : "FaceTime"}</strong>. Pick a category and draw a new question.
+          </div>
+          <div class="question-hint">
+            In FaceTime mode the card is larger and cleaner — perfect to read on-screen and talk.
+          </div>
+        </div>
+      `;
+      answeredBtnEl.disabled = true;
+    }
+
+    function drawQuestion() {
+      if (!currentCategory) {
+        showToast("Pick a category first.");
+        return;
+      }
+
+      const candidates = allQuestions.filter((q) => {
+        if (q.category !== currentCategory) return false;
+        if (!q.modes.includes(currentMode)) return false;
+        if (answered[q.id]) return false;
+        return true;
+      });
+
+      if (candidates.length === 0) {
+        questionContainerEl.innerHTML = `
+          <div class="question-card ${currentMode === "call" ? "call-mode" : ""}">
+            <div class="question-header">
+              <div class="question-tag">
+                <span class="dot"></span>All done
+              </div>
+              <div class="question-mode-label">
+                <span class="dot"></span>${currentMode === "text" ? "Text" : "FaceTime"}
+              </div>
+            </div>
+            <div class="question-text">
+              You’ve answered every question in this category for this mode.
+            </div>
+            <div class="question-hint">
+              Switch category, change mode, add your own questions, or reset progress to replay.
+            </div>
+          </div>
+        `;
+        answeredBtnEl.disabled = true;
+        updateStatusText();
+        return;
+      }
+
+      const idx = Math.floor(Math.random() * candidates.length);
+      currentQuestion = candidates[idx];
+      currentCustomText = "";
+      renderQuestion();
+      updateStatusText();
+    }
+
+    function markAnswered() {
+      if (!currentQuestion) return;
+      answered[currentQuestion.id] = true;
+      saveAnswered();
+      answeredBtnEl.disabled = true;
+      updateStatusText();
+      showToast("Marked as answered.");
+    }
+
+    function resetProgress() {
+      if (!confirm("Reset all answered questions for all categories?")) return;
+      answered = {};
+      saveAnswered();
+      currentQuestion = null;
+      currentCustomText = "";
+      allQuestions = mergeQuestions();
+      renderCategories();
+      updateStatusText();
+      questionContainerEl.innerHTML = `
+        <div class="question-card">
+          <div class="question-header">
+            <div class="question-tag">
+              <span class="dot"></span>Reset complete
+            </div>
+            <div class="question-mode-label">
+              <span class="dot"></span>${currentMode === "text" ? "Text Mode" : "FaceTime Mode"}
+            </div>
+          </div>
+          <div class="question-text">
+            All questions are available again. Pick a category and draw a fresh one.
+          </div>
+          <div class="question-hint">
+            You can keep adding new custom questions anytime below.
+          </div>
+        </div>
+      `;
+      answeredBtnEl.disabled = true;
+      showToast("Progress reset.");
+    }
+
+    function populateAddCategory() {
+      addCategoryEl.innerHTML = "";
+      CATEGORIES.forEach((cat) => {
+        const opt = document.createElement("option");
+        opt.value = cat.id;
+        opt.textContent = `${cat.emoji} ${cat.label}`;
+        addCategoryEl.appendChild(opt);
+      });
+    }
+
+    function addCustomQuestion() {
+      const category = addCategoryEl.value;
+      const text = addTextEl.value.trim();
+      const modes = [];
+      if (modeTextCheckboxEl.checked) modes.push("text");
+      if (modeCallCheckboxEl.checked) modes.push("call");
+
+      if (!category || !text || modes.length === 0) {
+        showToast("Fill category, text and modes.");
+        return;
+      }
+
+      const q = {
+        id: "custom-" + Date.now(),
+        category,
+        text,
+        modes,
+        type: "normal"
+      };
+      customQuestions.push(q);
+      saveCustomQuestions();
+      allQuestions = mergeQuestions();
+      addTextEl.value = "";
+      renderCategories();
+      updateStatusText();
+      showToast("Custom question added.");
+    }
+
+    // --------------------------
+    // Event wiring
+    // --------------------------
+
+    modeSwitchEl.addEventListener("click", (e) => {
+      const btn = e.target.closest(".mode-btn");
+      if (!btn) return;
+      const mode = btn.getAttribute("data-mode");
+      if (!mode || mode === currentMode) return;
+
+      document.querySelectorAll(".mode-btn").forEach((b) => {
+        b.classList.toggle("active", b === btn);
+      });
+
+      changeMode(mode);
+    });
+
+    categoryGridEl.addEventListener("click", (e) => {
+      const card = e.target.closest(".category-card");
+      if (!card) return;
+      const catId = card.getAttribute("data-category");
+      if (!catId) return;
+      selectCategory(catId);
+    });
+
+    drawBtnEl.addEventListener("click", drawQuestion);
+    skipBtnEl.addEventListener("click", drawQuestion);
+    resetBtnEl.addEventListener("click", resetProgress);
+    answeredBtnEl.addEventListener("click", markAnswered);
+
+    addBtnEl.addEventListener("click", addCustomQuestion);
+
+    // --------------------------
+    // Init
+    // --------------------------
+
+    function init() {
+      populateAddCategory();
+      renderCategories();
+      updateStatusText();
+    }
+
+    init();
+  </script>
+</body>
+</html>
